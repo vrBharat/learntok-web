@@ -293,6 +293,9 @@ export const likeVideo = async (
     userId: string,
     videoId: string
 ): Promise<void> => {
+    const videoRef = doc(db, COLLECTIONS.VIDEOS, videoId);
+    const videoSnap = await getDoc(videoRef);
+
     const batch = writeBatch(db);
 
     const likeRef = doc(collection(db, COLLECTIONS.LIKES));
@@ -302,10 +305,28 @@ export const likeVideo = async (
         createdAt: serverTimestamp(),
     });
 
-    const videoRef = doc(db, COLLECTIONS.VIDEOS, videoId);
     batch.update(videoRef, {
         likesCount: increment(1),
     });
+
+    if (videoSnap.exists()) {
+        const videoData = videoSnap.data();
+        if (videoData.creatorId !== userId) {
+            const userSnap = await getDoc(doc(db, COLLECTIONS.USERS, userId));
+            const userData = userSnap.data();
+
+            const notifRef = doc(collection(db, COLLECTIONS.NOTIFICATIONS));
+            batch.set(notifRef, {
+                userId: videoData.creatorId,
+                type: 'like',
+                title: 'New Like',
+                body: `${userData?.displayName || 'Someone'} liked your video`,
+                data: { videoId, videoThumbnail: videoData.thumbnailUrl, senderName: userData?.displayName, senderAvatar: userData?.profilePic },
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+        }
+    }
 
     await batch.commit();
 };
@@ -461,6 +482,25 @@ export const getSavedVideos = async (
     };
 };
 
+/**
+ * Check if user saved a video
+ */
+export const checkIfSaved = async (
+    userId: string,
+    videoId: string
+): Promise<boolean> => {
+    const savedRef = collection(db, COLLECTIONS.SAVED);
+    const q = query(
+        savedRef,
+        where('userId', '==', userId),
+        where('videoId', '==', videoId),
+        limit(1)
+    );
+
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+};
+
 // ==================== FOLLOW OPERATIONS ====================
 
 /**
@@ -470,6 +510,9 @@ export const followUser = async (
     followerId: string,
     followingId: string
 ): Promise<void> => {
+    const followerRef = doc(db, COLLECTIONS.USERS, followerId);
+    const followerSnap = await getDoc(followerRef);
+
     const batch = writeBatch(db);
 
     const followRef = doc(collection(db, COLLECTIONS.FOLLOWS));
@@ -479,7 +522,6 @@ export const followUser = async (
         createdAt: serverTimestamp(),
     });
 
-    const followerRef = doc(db, COLLECTIONS.USERS, followerId);
     batch.update(followerRef, {
         followingCount: increment(1),
     });
@@ -487,6 +529,18 @@ export const followUser = async (
     const followingRef = doc(db, COLLECTIONS.USERS, followingId);
     batch.update(followingRef, {
         followersCount: increment(1),
+    });
+
+    const notifRef = doc(collection(db, COLLECTIONS.NOTIFICATIONS));
+    const followerData = followerSnap.data();
+    batch.set(notifRef, {
+        userId: followingId,
+        type: 'follow',
+        title: 'New Follower',
+        body: `${followerData?.displayName || 'Someone'} started following you`,
+        data: { senderName: followerData?.displayName, senderAvatar: followerData?.profilePic },
+        read: false,
+        createdAt: serverTimestamp(),
     });
 
     await batch.commit();
@@ -606,3 +660,249 @@ export const getFollowingFeed = async (
         lastDoc: snapshot.docs[snapshot.docs.length - 1],
     };
 };
+
+// ==================== COMMENT OPERATIONS ====================
+
+/**
+ * Get comments for a video
+ */
+export const getComments = async (videoId: string): Promise<Comment[]> => {
+    const commentsRef = collection(db, COLLECTIONS.COMMENTS);
+    const q = query(
+        commentsRef,
+        where('videoId', '==', videoId),
+        orderBy('createdAt', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+
+    return await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+            const data = docSnap.data();
+            const user = await getUser(data.userId);
+            return {
+                id: docSnap.id,
+                ...data,
+                user,
+                likesCount: data.likesCount || 0,
+                createdAt: data.createdAt?.toDate(),
+            } as import('@/types').Comment;
+        })
+    );
+};
+
+/**
+ * Like a comment
+ */
+export const likeComment = async (
+    userId: string,
+    commentId: string
+): Promise<void> => {
+    const docRef = doc(db, COLLECTIONS.COMMENTS, commentId);
+    await updateDoc(docRef, {
+        likesCount: increment(1),
+    });
+};
+
+/**
+ * Unlike a comment
+ */
+export const unlikeComment = async (
+    userId: string,
+    commentId: string
+): Promise<void> => {
+    const docRef = doc(db, COLLECTIONS.COMMENTS, commentId);
+    await updateDoc(docRef, {
+        likesCount: increment(-1),
+    });
+};
+
+
+/**
+ * Add a comment to a video
+ */
+export const addComment = async (
+    videoId: string,
+    userId: string,
+    text: string
+): Promise<Comment> => {
+    const commentData = {
+        videoId,
+        userId,
+        text,
+        likesCount: 0,
+        createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(collection(db, COLLECTIONS.COMMENTS), commentData);
+
+    // Increment comment count on video
+    const videoRef = doc(db, COLLECTIONS.VIDEOS, videoId);
+    await updateDoc(videoRef, {
+        commentsCount: increment(1),
+    });
+
+    const user = await getUser(userId);
+
+    // Create notification for creator
+    const videoSnap = await getDoc(videoRef);
+    if (videoSnap.exists()) {
+        const videoData = videoSnap.data();
+        if (videoData.creatorId !== userId) {
+            await addDoc(collection(db, COLLECTIONS.NOTIFICATIONS), {
+                userId: videoData.creatorId,
+                type: 'comment',
+                title: 'New Comment',
+                body: `${user?.displayName || 'Someone'} commented on your video`,
+                data: {
+                    videoId,
+                    commentId: docRef.id,
+                    videoThumbnail: videoData.thumbnailUrl,
+                    senderName: user?.displayName,
+                    senderAvatar: user?.profilePic,
+                    text: text
+                },
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+        }
+    }
+
+    return {
+        id: docRef.id,
+        ...commentData,
+        user,
+        createdAt: new Date(),
+    } as Comment;
+};
+/**
+ * Get user's watch history
+ */
+export const getWatchHistory = async (
+    userId: string,
+    lastDoc?: DocumentSnapshot,
+    pageSize = 20
+): Promise<PaginatedResponse<WatchHistory>> => {
+    const historyRef = collection(db, COLLECTIONS.WATCH_HISTORY);
+    const constraints: QueryConstraint[] = [
+        where('userId', '==', userId),
+        orderBy('watchedAt', 'desc'),
+        limit(pageSize),
+    ];
+
+    if (lastDoc) {
+        constraints.push(startAfter(lastDoc));
+    }
+
+    const q = query(historyRef, ...constraints);
+    const snapshot = await getDocs(q);
+
+    const history = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+            const data = docSnap.data();
+            const video = await getVideo(data.videoId);
+            return {
+                id: docSnap.id,
+                ...data,
+                video,
+                watchedAt: data.watchedAt?.toDate(),
+            } as WatchHistory;
+        })
+    );
+
+    return {
+        items: history,
+        hasMore: snapshot.docs.length === pageSize,
+        lastDoc: snapshot.docs[snapshot.docs.length - 1],
+    };
+};
+
+/**
+ * Get user's liked videos
+ */
+export const getLikedVideos = async (
+    userId: string,
+    lastDoc?: DocumentSnapshot,
+    pageSize = 10
+): Promise<PaginatedResponse<Video>> => {
+    const likesRef = collection(db, COLLECTIONS.LIKES);
+    const constraints: QueryConstraint[] = [
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize),
+    ];
+
+    if (lastDoc) {
+        constraints.push(startAfter(lastDoc));
+    }
+
+    const q = query(likesRef, ...constraints);
+    const snapshot = await getDocs(q);
+
+    const videos = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+            const data = docSnap.data();
+            const video = await getVideo(data.videoId);
+            return video;
+        })
+    );
+
+    // Filter out nulls in case any video was deleted
+    const validVideos = videos.filter((v): v is Video => v !== null);
+
+    return {
+        items: validVideos,
+        hasMore: snapshot.docs.length === pageSize,
+        lastDoc: snapshot.docs[snapshot.docs.length - 1],
+    };
+};
+
+// ==================== NOTIFICATIONS ====================
+
+/**
+ * Get user's notifications
+ */
+export const getNotifications = async (
+    userId: string,
+    lastDoc?: DocumentSnapshot,
+    pageSize = 20
+): Promise<PaginatedResponse<import('@/types').Notification>> => {
+    const notifsRef = collection(db, COLLECTIONS.NOTIFICATIONS);
+    const constraints: QueryConstraint[] = [
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize),
+    ];
+
+    if (lastDoc) {
+        constraints.push(startAfter(lastDoc));
+    }
+
+    const q = query(notifsRef, ...constraints);
+    const snapshot = await getDocs(q);
+
+    const notifications = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+        createdAt: docSnap.data().createdAt?.toDate(),
+    })) as import('@/types').Notification[];
+
+    return {
+        items: notifications,
+        hasMore: snapshot.docs.length === pageSize,
+        lastDoc: snapshot.docs[snapshot.docs.length - 1],
+    };
+};
+
+/**
+ * Mark notification as read
+ */
+export const markNotificationAsRead = async (
+    notificationId: string
+): Promise<void> => {
+    const docRef = doc(db, COLLECTIONS.NOTIFICATIONS, notificationId);
+    await updateDoc(docRef, {
+        read: true,
+    });
+};
+

@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, MessageCircle, Bookmark, Share2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Share2, Play, Pause, Volume2, VolumeX, UserPlus, UserCheck } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
-import { toggleLike, toggleSave } from '@/store/slices/videoSlice';
+import { toggleLike, toggleSave, fetchComments, postComment, toggleCommentLike } from '@/store/slices/videoSlice';
+import { toggleFollow } from '@/store/slices/userSlice';
 import { Avatar } from './ui/Avatar';
 import { Text } from './ui/Text';
 import { View } from './ui/View';
+import { CommentsModal } from './CommentsModal';
 import { cn } from '@/lib/utils';
 import { Video } from '@/types';
+import { checkIfLiked, checkIfSaved, checkIfFollowing } from '@/services/firebase/firestore';
 
 interface VideoCardProps {
     video: Video;
@@ -22,9 +25,12 @@ export const VideoCard = ({ video, isActive }: VideoCardProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const dispatch = useDispatch<AppDispatch>();
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { comments, isCommentsLoading } = useSelector((state: RootState) => state.video);
 
-    const isLiked = video.id ? false : false; // This should come from a check or state
-    const isSaved = false; // This should come from a check or state
+    const [isLiked, setIsLiked] = useState(video.isLiked || false);
+    const [isSaved, setIsSaved] = useState(video.isSaved || false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
     useEffect(() => {
         if (videoRef.current) {
@@ -37,6 +43,22 @@ export const VideoCard = ({ video, isActive }: VideoCardProps) => {
             }
         }
     }, [isActive]);
+
+    useEffect(() => {
+        const checkInteractions = async () => {
+            if (isAuthenticated && user && video.id) {
+                const [liked, saved, following] = await Promise.all([
+                    checkIfLiked(user.id, video.id),
+                    checkIfSaved(user.id, video.id),
+                    checkIfFollowing(user.id, video.creatorId)
+                ]);
+                setIsLiked(liked);
+                setIsSaved(saved);
+                setIsFollowing(following);
+            }
+        };
+        checkInteractions();
+    }, [isAuthenticated, user, video.id, video.creatorId]);
 
     const togglePlay = () => {
         if (videoRef.current) {
@@ -51,23 +73,61 @@ export const VideoCard = ({ video, isActive }: VideoCardProps) => {
 
     const handleLike = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!isAuthenticated || !user) return; // Should show login modal
+        if (!isAuthenticated || !user) return;
+        setIsLiked(!isLiked);
         dispatch(toggleLike({
             userId: user.id,
             videoId: video.id,
-            isLiked: video.isLiked || false
+            isLiked: isLiked
         }));
     };
 
     const handleSave = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!isAuthenticated || !user) return; // Should show login modal
+        if (!isAuthenticated || !user) return;
+        setIsSaved(!isSaved);
         dispatch(toggleSave({
             userId: user.id,
             videoId: video.id,
-            isSaved: video.isSaved || false
+            isSaved: isSaved
         }));
     };
+
+    const handleFollow = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isAuthenticated || !user) return;
+        setIsFollowing(!isFollowing);
+        dispatch(toggleFollow({
+            followerId: user.id,
+            followingId: video.creatorId,
+            isFollowing: isFollowing
+        }));
+    };
+
+    const handleOpenComments = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsCommentsOpen(true);
+        dispatch(fetchComments(video.id));
+    };
+
+    const handleAddComment = (text: string) => {
+        if (!isAuthenticated || !user) return;
+        dispatch(postComment({
+            videoId: video.id,
+            userId: user.id,
+            text
+        }));
+    };
+
+    const handleToggleCommentLike = (commentId: string, isLiked: boolean) => {
+        if (!isAuthenticated || !user) return;
+        dispatch(toggleCommentLike({
+            videoId: video.id,
+            commentId,
+            isLiked
+        }));
+    };
+
 
     return (
         <div className="video-item relative w-full h-full flex flex-col items-center justify-center py-4 bg-background">
@@ -93,9 +153,20 @@ export const VideoCard = ({ video, isActive }: VideoCardProps) => {
                                 <Text className="text-white font-bold text-sm tracking-tight">{video.creator?.displayName}</Text>
                                 <Text className="text-text-tertiary text-[10px]">@{video.creator?.username}</Text>
                             </div>
-                            <button className="ml-2 px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-full text-[10px] font-bold hover:bg-primary/30 transition-colors">
-                                Follow
-                            </button>
+                            {user?.id !== video.creatorId && (
+                                <button
+                                    onClick={handleFollow}
+                                    className={cn(
+                                        "ml-2 px-3 py-1 rounded-full text-[10px] font-bold transition-all flex items-center gap-1",
+                                        isFollowing
+                                            ? "bg-surface-light text-text-secondary border border-border"
+                                            : "bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
+                                    )}
+                                >
+                                    {isFollowing ? <UserCheck size={12} /> : <UserPlus size={12} />}
+                                    {isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                            )}
                         </div>
 
                         <Text className="text-white text-sm font-medium leading-snug line-clamp-2">
@@ -121,7 +192,7 @@ export const VideoCard = ({ video, isActive }: VideoCardProps) => {
                     <InteractionButton
                         icon={<MessageCircle size={24} />}
                         count={video.commentsCount}
-                        onClick={(e) => { e.stopPropagation(); /* Show comments */ }}
+                        onClick={handleOpenComments}
                     />
                     <InteractionButton
                         icon={<Bookmark size={24} className={cn(isSaved && "fill-accent text-accent")} />}
@@ -152,6 +223,15 @@ export const VideoCard = ({ video, isActive }: VideoCardProps) => {
                     {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                 </button>
             </View>
+
+            <CommentsModal
+                isOpen={isCommentsOpen}
+                onClose={() => setIsCommentsOpen(false)}
+                comments={comments[video.id] || []}
+                onAddComment={handleAddComment}
+                onToggleLike={handleToggleCommentLike}
+                isLoading={isCommentsLoading}
+            />
         </div>
     );
 };

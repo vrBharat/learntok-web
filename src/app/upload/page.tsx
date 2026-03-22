@@ -79,6 +79,7 @@ export default function UploadPage() {
                 videoUrl: uploadResult.url,
                 thumbnailUrl: uploadResult.thumbnailUrl || '',
                 creatorId: user.id,
+                hashtags: [],
                 likesCount: 0,
                 commentsCount: 0,
                 viewsCount: 0,

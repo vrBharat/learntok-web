@@ -20,15 +20,15 @@ export const Navbar = () => {
     return (
         <>
             {/* Desktop Sidebar */}
-            <nav className="fixed left-0 top-0 hidden h-full w-64 border-r border-border bg-background px-4 py-8 md:flex flex-col gap-8">
-                <div className="flex items-center gap-2 px-2 pb-4 border-b border-border mb-4 cursor-pointer" onClick={() => router.push('/')}>
-                    <div className="bg-primary p-2 rounded-lg">
-                        <BookOpen size={24} className="text-white" />
+            <nav className="fixed left-0 top-0 hidden h-full w-64 border-r border-border sidebar-glass px-4 py-8 md:flex flex-col gap-8 z-50">
+                <div className="flex items-center gap-2 px-2 pb-4 border-b border-border mb-4 cursor-pointer group" onClick={() => router.push('/')}>
+                    <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <BookOpen size={24} className="text-primary" />
                     </div>
-                    <span className="text-xl font-bold text-white">LearnTok</span>
+                    <span className="text-xl font-bold text-text-primary tracking-tight">LearnTok</span>
                 </div>
 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -37,14 +37,17 @@ export const Navbar = () => {
                                 key={item.href}
                                 onClick={() => router.push(item.href)}
                                 className={cn(
-                                    'flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group',
+                                    'flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group relative',
                                     isActive
                                         ? 'bg-primary/10 text-primary'
-                                        : 'text-text-secondary hover:bg-surface-light hover:text-white'
+                                        : 'text-text-secondary hover:bg-surface-light hover:text-text-primary'
                                 )}
                             >
-                                <Icon size={24} className={cn('transition-transform duration-200 group-hover:scale-110', isActive && 'stroke-[2.5px]')} />
-                                <span className={cn('text-lg font-medium', isActive && 'font-semibold')}>
+                                {isActive && (
+                                    <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
+                                )}
+                                <Icon size={22} className={cn('transition-transform duration-200 group-hover:scale-110', isActive && 'stroke-[2.5px]')} />
+                                <span className={cn('text-base font-medium', isActive && 'font-semibold')}>
                                     {item.label}
                                 </span>
                             </button>
@@ -52,11 +55,12 @@ export const Navbar = () => {
                     })}
                 </div>
 
-                <div className="mt-auto p-4 rounded-2xl bg-surface-light border border-border">
-                    <p className="text-sm font-semibold text-white mb-1">Learn Premium</p>
-                    <p className="text-xs text-text-tertiary mb-3">Get unlimited access to advanced quizzes and doubts.</p>
-                    <button className="w-full py-2 bg-accent text-black font-bold rounded-lg text-sm hover:bg-accent-light transition-colors">
-                        Upgrade
+                <div className="mt-auto p-5 rounded-2xl bg-surface-light border border-border relative overflow-hidden group">
+                    <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-colors" />
+                    <p className="text-sm font-bold text-text-primary mb-1 relative z-10">Learn Premium</p>
+                    <p className="text-xs text-text-tertiary mb-4 relative z-10 leading-relaxed">Unlock advanced AI tutors and ad-free learning.</p>
+                    <button className="w-full py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition-all shadow-glow-sm hover:shadow-glow relative z-10">
+                        Upgrade Now
                     </button>
                 </div>
             </nav>

@@ -20,6 +20,7 @@ export interface User {
     streak: number;
     totalWatchTime: number;
     badges: Badge[];
+    totalLikesReceived: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -62,14 +63,14 @@ export interface Video {
 export type VideoStatus = 'pending' | 'approved' | 'rejected' | 'deleted';
 
 export type Category =
-    | 'coding'
-    | 'english'
-    | 'finance'
-    | 'productivity'
-    | 'career'
-    | 'exam-prep'
-    | 'design'
-    | 'communication';
+    | 'Mathematics'
+    | 'Science'
+    | 'History'
+    | 'Technology'
+    | 'Languages'
+    | 'Art'
+    | 'Business'
+    | 'Other';
 
 // Comment Types
 export interface Comment {

@@ -1,10 +1,9 @@
 'use client';
-
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Edit2, Settings, Grid, Heart, Bookmark } from 'lucide-react';
 import { RootState, AppDispatch } from '@/store';
-import { fetchUserVideos } from '@/store/slices/userSlice';
+import { fetchUserVideos, fetchLikedVideos, fetchSavedVideos } from '@/store/slices/userSlice';
 import AppLayout from '@/components/AppLayout';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -16,14 +15,20 @@ import { cn } from '@/lib/utils';
 export default function ProfilePage() {
     const dispatch = useDispatch<AppDispatch>();
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-    const { userVideos, isLoading } = useSelector((state: RootState) => state.user);
+    const { userVideos, likedVideos, savedVideos, isLoading } = useSelector((state: RootState) => state.user);
     const [activeTab, setActiveTab] = React.useState<'videos' | 'liked' | 'saved'>('videos');
 
     useEffect(() => {
         if (user) {
-            dispatch(fetchUserVideos(user.id));
+            if (activeTab === 'videos') {
+                dispatch(fetchUserVideos(user.id));
+            } else if (activeTab === 'liked') {
+                dispatch(fetchLikedVideos(user.id));
+            } else if (activeTab === 'saved') {
+                dispatch(fetchSavedVideos(user.id));
+            }
         }
-    }, [dispatch, user]);
+    }, [dispatch, user, activeTab]);
 
     if (!isAuthenticated || !user) {
         return (
@@ -35,6 +40,16 @@ export default function ProfilePage() {
             </AppLayout>
         );
     }
+
+    const getTabData = () => {
+        switch (activeTab) {
+            case 'liked': return likedVideos;
+            case 'saved': return savedVideos.map(s => s.video).filter(v => v !== undefined) as any;
+            default: return userVideos;
+        }
+    };
+
+    const videosToDisplay = getTabData();
 
     return (
         <AppLayout>
@@ -100,12 +115,15 @@ export default function ProfilePage() {
                     <div className="flex justify-center p-12">
                         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                     </div>
-                ) : userVideos.length === 0 ? (
-                    <div className="text-center py-20 opacity-50">
+                ) : videosToDisplay.length === 0 ? (
+                    <div className="text-center py-20 opacity-50 flex flex-col items-center gap-4">
+                        <div className="p-6 bg-surface-light rounded-full">
+                            {activeTab === 'videos' ? <Grid size={48} /> : activeTab === 'liked' ? <Heart size={48} /> : <Bookmark size={48} />}
+                        </div>
                         <Text variant="caption">Nothing to show yet.</Text>
                     </div>
                 ) : (
-                    <VideoGrid videos={userVideos} />
+                    <VideoGrid videos={videosToDisplay} />
                 )}
             </div>
         </AppLayout>

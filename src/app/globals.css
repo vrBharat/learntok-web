@@ -1,6 +1,40 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #8b5cf6;
+  --color-primary-light: #a78bfa;
+  --color-primary-dark: #7c3aed;
+
+  --color-secondary: #10b981;
+  --color-secondary-light: #34d399;
+  --color-secondary-dark: #059669;
+
+  --color-accent: #f59e0b;
+  --color-accent-pink: #ec4899;
+  --color-accent-blue: #3b82f6;
+
+  --color-background: #0a0a0f;
+  --color-background-secondary: #12121a;
+  --color-background-tertiary: #1a1a24;
+
+  --color-surface: #16161f;
+  --color-surface-light: #1f1f2a;
+
+  --color-card: #1e1e2a;
+  --color-card-hover: #252532;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #71717a;
+  --color-text-muted: #52525b;
+
+  --color-border: #27272a;
+  --color-border-light: #3f3f46;
+
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+}
 
 :root {
   --background: #0a0a0f;
@@ -10,7 +44,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }
 
@@ -45,7 +79,6 @@ body {
 /* Video Feed Container */
 .video-feed {
   height: calc(100vh - 64px);
-  /* Subtract Header height */
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
 }
@@ -55,15 +88,24 @@ body {
   scroll-snap-align: start;
 }
 
-/* Shadow Glows */
+/* Premium Effects */
+.glass-effect {
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-glass {
+  background: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
 .shadow-glow {
-  box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
 .shadow-glow-secondary {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-}
-
-.shadow-glow-sm {
-  box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }

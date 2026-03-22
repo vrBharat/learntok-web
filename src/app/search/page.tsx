@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Search as SearchIcon, X, SlidersHorizontal } from 'lucide-react';
 import { RootState, AppDispatch } from '@/store';
-import { searchForVideos, setSelectedCategory } from '@/store/slices/videoSlice';
+import { searchForVideos, setSelectedCategory, fetchVideos } from '@/store/slices/videoSlice';
 import AppLayout from '@/components/AppLayout';
 import { Text } from '@/components/ui/Text';
 import { View } from '@/components/ui/View';
@@ -30,7 +30,11 @@ export default function SearchPage() {
 
     const handleCategorySelect = (category: Category | null) => {
         dispatch(setSelectedCategory(category));
-        // In a real app, this might trigger a different search or filter
+        // Clear query when selecting a category to show category results
+        if (category) {
+            setQuery('');
+            dispatch(fetchVideos({ refresh: true }));
+        }
     };
 
     return (

@@ -1,20 +1,26 @@
 'use client';
-
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Bell, Heart, MessageCircle, UserPlus, Info } from 'lucide-react';
 import { RootState, AppDispatch } from '@/store';
+import { fetchNotifications, markAsRead } from '@/store/slices/notificationSlice';
 import AppLayout from '@/components/AppLayout';
 import { Text } from '@/components/ui/Text';
 import { View } from '@/components/ui/View';
 import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function NotificationsPage() {
+    const dispatch = useDispatch<AppDispatch>();
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-    // In a real app, notifications would be in a slice. For now, let's mock or check if we have a slice.
-    // I noticed 'notifications' was in COLECTIONS but maybe not in a slice yet.
-    const notifications: any[] = [];
+    const { notifications, isLoading } = useSelector((state: RootState) => state.notification);
+
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            dispatch(fetchNotifications({ userId: user.id, refresh: true }));
+        }
+    }, [dispatch, isAuthenticated, user]);
 
     if (!isAuthenticated) {
         return (
@@ -43,7 +49,11 @@ export default function NotificationsPage() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                    {notifications.length === 0 ? (
+                    {isLoading && notifications.length === 0 ? (
+                        <div className="flex justify-center py-20">
+                            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        </div>
+                    ) : notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
                             <div className="p-6 bg-surface-light rounded-full">
                                 <Bell size={48} />
@@ -51,85 +61,67 @@ export default function NotificationsPage() {
                             <Text variant="caption">All caught up! No new notifications.</Text>
                         </div>
                     ) : (
-                        notifications.map((notif) => (
-                            <NotificationItem key={notif.id} notif={notif} />
-                        ))
+                        <div className="flex flex-col gap-2">
+                            {notifications.map((notif) => (
+                                <NotificationItem
+                                    key={notif.id}
+                                    notif={notif}
+                                    onRead={() => dispatch(markAsRead(notif.id))}
+                                />
+                            ))}
+                        </div>
                     )}
-
-                    {/* Mock Notifications for UI demonstration during development */}
-                    <div className="mt-8 flex flex-col gap-1">
-                        <Text variant="tiny" className="px-4 mb-2 uppercase tracking-widest opacity-50">Recent Activities</Text>
-                        <MockNotification
-                            type="like"
-                            user="Sarah Jenkins"
-                            action="liked your video"
-                            time="2m ago"
-                            videoThumbnail="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100"
-                        />
-                        <MockNotification
-                            type="follow"
-                            user="Alex Chen"
-                            action="started following you"
-                            time="1h ago"
-                        />
-                        <MockNotification
-                            type="comment"
-                            user="Education First"
-                            action="replied to your comment: 'Great explanation!'"
-                            time="5h ago"
-                            videoThumbnail="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=100"
-                        />
-                    </div>
                 </div>
             </div>
         </AppLayout>
     );
 }
 
-const NotificationItem = ({ notif }: { notif: any }) => (
-    <div className="flex items-center gap-4 p-4 hover:bg-surface-light rounded-2xl transition-all cursor-pointer border border-transparent hover:border-border/50 group">
-        <Avatar name={notif.senderName} src={notif.senderAvatar} size="md" />
-        <div className="flex-1">
-            <Text className="text-sm">
-                <span className="font-bold text-white tracking-tight">{notif.senderName}</span>
-                <span className="text-text-secondary ml-1">{notif.message}</span>
-            </Text>
-            <Text variant="tiny" className="mt-0.5 opacity-50">{notif.time}</Text>
-        </div>
-        {notif.videoThumbnail && (
-            <img src={notif.videoThumbnail} className="h-12 w-12 rounded-lg object-cover" alt="Video" />
-        )}
-    </div>
-);
-
-const MockNotification = ({ type, user, action, time, videoThumbnail }: any) => {
+const NotificationItem = ({ notif, onRead }: { notif: any, onRead: () => void }) => {
     const icons = {
         like: <Heart size={14} className="fill-red-500 text-red-500" />,
         comment: <MessageCircle size={14} className="fill-blue-500 text-blue-500" />,
         follow: <UserPlus size={14} className="fill-green-500 text-green-500" />,
-        info: <Info size={14} className="fill-yellow-500 text-yellow-500" />,
+        system: <Info size={14} className="fill-yellow-500 text-yellow-500" />,
+        video_approved: <Info size={14} className="fill-green-500 text-green-500" />,
+        video_rejected: <Info size={14} className="fill-red-500 text-red-500" />,
+        streak: <Info size={14} className="fill-orange-500 text-orange-500" />,
+        badge: <Info size={14} className="fill-purple-500 text-purple-500" />,
     };
 
+    const timeString = notif.createdAt
+        ? formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })
+        : '';
+
     return (
-        <div className="flex items-center gap-4 p-4 hover:bg-surface-light rounded-2xl transition-all cursor-pointer border border-transparent hover:border-border/50 group animate-in slide-in-from-right duration-300">
+        <div
+            onClick={onRead}
+            className={cn(
+                "flex items-center gap-4 p-4 hover:bg-surface-light rounded-2xl transition-all cursor-pointer border border-transparent hover:border-border/50 group animate-in slide-in-from-right duration-300",
+                !notif.read && "bg-primary/5 border-primary/20"
+            )}
+        >
             <div className="relative">
-                <Avatar name={user} size="md" />
+                <Avatar name={notif.data?.senderName || "System"} src={notif.data?.senderAvatar} size="md" />
                 <div className="absolute -bottom-1 -right-1 bg-background p-1 rounded-full border border-border shadow-lg">
-                    {icons[type as keyof typeof icons]}
+                    {icons[notif.type as keyof typeof icons] || <Bell size={14} />}
                 </div>
             </div>
             <div className="flex-1">
                 <Text className="text-sm">
-                    <span className="font-bold text-white tracking-tight">{user}</span>
-                    <span className="text-text-secondary ml-1">{action}</span>
+                    <span className="font-bold text-white tracking-tight">{notif.data?.senderName || notif.title}</span>
+                    <span className="text-text-secondary ml-1">{notif.body}</span>
                 </Text>
-                <Text variant="tiny" className="mt-0.5 opacity-50">{time}</Text>
+                <Text variant="tiny" className="mt-0.5 opacity-50">{timeString}</Text>
             </div>
-            {videoThumbnail && (
+            {notif.data?.videoThumbnail && (
                 <div className="relative group/thumb">
-                    <img src={videoThumbnail} className="h-12 w-12 rounded-lg object-cover border border-border" alt="Video" />
+                    <img src={notif.data.videoThumbnail} className="h-12 w-12 rounded-lg object-cover border border-border" alt="Video" />
                     <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover/thumb:opacity-100 transition-opacity rounded-lg" />
                 </div>
+            )}
+            {!notif.read && (
+                <div className="h-2 w-2 rounded-full bg-primary shadow-glow" />
             )}
         </div>
     );

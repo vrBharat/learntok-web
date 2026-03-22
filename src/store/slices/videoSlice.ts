@@ -14,6 +14,8 @@ import {
     incrementViewCount,
     searchVideos,
     getFollowingFeed,
+    likeComment,
+    unlikeComment,
 } from '@/services/firebase/firestore';
 
 interface VideoState {
@@ -29,6 +31,19 @@ interface VideoState {
     searchResults: Video[];
     isSearching: boolean;
     feedMode: 'forYou' | 'following';
+    comments: { [videoId: string]: Comment[] };
+    isCommentsLoading: boolean;
+}
+
+interface Comment {
+    id: string;
+    videoId: string;
+    userId: string;
+    user?: import('@/types').User;
+    text: string;
+    likesCount: number;
+    isLiked?: boolean;
+    createdAt: Date;
 }
 
 const initialState: VideoState = {
@@ -47,6 +62,8 @@ const initialState: VideoState = {
     searchResults: [],
     isSearching: false,
     feedMode: 'forYou',
+    comments: {},
+    isCommentsLoading: false,
 };
 
 // Async Thunks
@@ -131,6 +148,35 @@ export const recordView = createAsyncThunk(
     }
 );
 
+export const fetchComments = createAsyncThunk(
+    'video/fetchComments',
+    async (videoId: string, { rejectWithValue }) => {
+        try {
+            const { getComments } = await import('@/services/firebase/firestore');
+            const comments = await getComments(videoId);
+            return { videoId, comments };
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const postComment = createAsyncThunk(
+    'video/postComment',
+    async (
+        { videoId, userId, text }: { videoId: string; userId: string; text: string },
+        { rejectWithValue }
+    ) => {
+        try {
+            const { addComment } = await import('@/services/firebase/firestore');
+            const comment = await addComment(videoId, userId, text);
+            return comment;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const searchForVideos = createAsyncThunk(
     'video/searchForVideos',
     async (query: string, { rejectWithValue }) => {
@@ -142,6 +188,28 @@ export const searchForVideos = createAsyncThunk(
         }
     }
 );
+
+export const toggleCommentLike = createAsyncThunk(
+    'video/toggleCommentLike',
+    async (
+        { videoId, commentId, isLiked }: { videoId: string; commentId: string; isLiked: boolean },
+        { getState, rejectWithValue }
+    ) => {
+        try {
+            const state = getState() as { auth: { user: { id: string } } };
+            const userId = state.auth.user.id;
+            if (isLiked) {
+                await unlikeComment(userId, commentId);
+            } else {
+                await likeComment(userId, commentId);
+            }
+            return { videoId, commentId, isLiked: !isLiked };
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 
 export const fetchFollowingVideos = createAsyncThunk(
     'video/fetchFollowingVideos',
@@ -297,6 +365,47 @@ const videoSlice = createSlice({
                 state.isRefreshing = false;
                 state.error = action.payload as string;
             });
+
+        // Fetch Comments
+        builder
+            .addCase(fetchComments.pending, (state) => {
+                state.isCommentsLoading = true;
+            })
+            .addCase(fetchComments.fulfilled, (state, action) => {
+                state.isCommentsLoading = false;
+                state.comments[action.payload.videoId] = action.payload.comments;
+            })
+            .addCase(fetchComments.rejected, (state) => {
+                state.isCommentsLoading = false;
+            });
+
+        // Post Comment
+        builder.addCase(postComment.fulfilled, (state, action) => {
+            const { videoId } = action.payload;
+            if (!state.comments[videoId]) {
+                state.comments[videoId] = [];
+            }
+            state.comments[videoId] = [action.payload, ...state.comments[videoId]];
+
+            // Update comments count on video
+            const video = state.videos.find(v => v.id === videoId);
+            if (video) {
+                video.commentsCount += 1;
+            }
+        });
+
+        // Toggle Comment Like
+        builder.addCase(toggleCommentLike.fulfilled, (state, action) => {
+            const { videoId, commentId, isLiked } = action.payload;
+            const videoComments = state.comments[videoId];
+            if (videoComments) {
+                const comment = videoComments.find(c => c.id === commentId);
+                if (comment) {
+                    comment.isLiked = isLiked;
+                    comment.likesCount += isLiked ? 1 : -1;
+                }
+            }
+        });
     },
 });
 

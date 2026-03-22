@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BookOpen, User } from 'lucide-react';
+import { BookOpen, User, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
@@ -13,22 +13,20 @@ export const Header = () => {
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
     return (
-        <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-8">
+        <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between glass-effect px-4 md:px-8">
             <div className="flex items-center gap-2 md:hidden" onClick={() => router.push('/')}>
-                <div className="bg-primary p-1.5 rounded-lg">
-                    <BookOpen size={20} className="text-white" />
-                </div>
-                <span className="text-lg font-bold text-white tracking-tight">LearnTok</span>
+                <BookOpen size={24} className="text-primary" />
+                <span className="text-lg font-bold text-text-primary tracking-tight">LearnTok</span>
             </div>
 
             <div className="hidden md:flex flex-1 max-w-xl mx-auto px-4">
-                <div className="relative w-full">
+                <div className="relative w-full group">
                     <input
-                        className="w-full bg-surface-light border border-border rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                        className="w-full bg-surface-light/50 border border-border rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-text-muted hover:bg-surface-light"
                         placeholder="Search educational shorts..."
                     />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary">
-                        <User size={16} />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors">
+                        <Search size={16} />
                     </div>
                 </div>
             </div>

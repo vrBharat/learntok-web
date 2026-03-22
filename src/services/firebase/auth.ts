@@ -51,6 +51,7 @@ export const signUpWithEmail = async (
             streak: 0,
             totalWatchTime: 0,
             badges: [],
+            totalLikesReceived: 0,
             createdAt: new Date(),
             updatedAt: new Date(),
         };
@@ -112,6 +113,7 @@ export const signInWithGoogle = async (): Promise<User> => {
                 streak: 0,
                 totalWatchTime: 0,
                 badges: [],
+                totalLikesReceived: 0,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };

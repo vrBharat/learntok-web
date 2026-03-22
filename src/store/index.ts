@@ -7,6 +7,7 @@ import authReducer from './slices/authSlice';
 import videoReducer from './slices/videoSlice';
 import userReducer from './slices/userSlice';
 import uiReducer from './slices/uiSlice';
+import notificationReducer from './slices/notificationSlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         video: videoReducer,
         user: userReducer,
         ui: uiReducer,
+        notification: notificationReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -37,6 +39,7 @@ export const store = configureStore({
                     'user/fetchUserProfile/fulfilled',
                     'user/fetchViewedProfile/fulfilled',
                     'video/fetchFollowingVideos/fulfilled',
+                    'notification/fetchNotifications/fulfilled',
                 ],
                 // Ignore these field paths in state
                 ignoredPaths: [
@@ -48,6 +51,8 @@ export const store = configureStore({
                     'user.savedVideos',
                     'user.watchHistory',
                     'user.userVideos',
+                    'notification.notifications',
+                    'notification.lastDoc',
                 ],
             },
         }),
