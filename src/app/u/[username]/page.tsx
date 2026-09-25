@@ -27,7 +27,7 @@ export default function UserProfile({ params }: { params: Promise<{ username: st
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b-2 border-black pb-8 mb-12 gap-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-4xl font-bold tracking-tighter">@{decodedUsername}</h1>
-            <p className="font-mono text-gray-600">LearnTalk Contributor</p>
+            <p className="font-mono text-gray-600">learntok.in Contributor</p>
           </div>
           
           <div className="flex gap-4 font-mono text-sm">

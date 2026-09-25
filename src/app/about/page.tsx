@@ -6,7 +6,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#fdfaf6] text-black font-sans w-full flex flex-col items-center pb-24">
       <div className="w-full max-w-2xl px-4 py-16 flex flex-col gap-8">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tighter border-b-2 border-black pb-4 mb-4">
-          ABOUT LEARN//TALK
+          ABOUT learntok.in
         </h1>
         
         <p className="text-xl font-mono text-gray-800 leading-relaxed">

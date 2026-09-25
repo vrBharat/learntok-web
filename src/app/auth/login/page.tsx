@@ -23,7 +23,7 @@ export default function LoginPage() {
         <div className="flex min-h-screen items-center justify-center bg-[#fdfaf6] text-black px-4 font-sans">
             <div className="w-full max-w-sm p-8 bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-6">
                 <div className="flex flex-col items-center gap-2 text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">LEARN//TALK</h2>
+                    <h2 className="text-2xl font-bold tracking-tight">learntok.in</h2>
                     <p className="text-sm font-mono text-gray-600">Sign in or create an account.</p>
                 </div>
 
