@@ -6,25 +6,32 @@ import { Search } from 'lucide-react';
 import ExperienceCard from '@/components/ExperienceCard';
 import { getExperiences, ExperienceData } from '@/services/firebase/experiences';
 
-export default function Home() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [recentExperiences, setRecentExperiences] = useState<ExperienceData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  import { useRouter } from 'next/navigation';
 
-  useEffect(() => {
-    const fetchRecent = async () => {
-      setIsLoading(true);
-      const data = await getExperiences(3);
-      setRecentExperiences(data);
-      setIsLoading(false);
+  export default function Home() {
+    const router = useRouter();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [recentExperiences, setRecentExperiences] = useState<ExperienceData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchRecent = async () => {
+        setIsLoading(true);
+        const data = await getExperiences(3);
+        setRecentExperiences(data);
+        setIsLoading(false);
+      };
+      fetchRecent();
+    }, []);
+
+    const handleSearch = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+      } else {
+        router.push('/explore');
+      }
     };
-    fetchRecent();
-  }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Searching for:', searchQuery);
-  };
 
   return (
     <main className="w-full max-w-4xl mx-auto px-4 py-8 md:py-16 flex flex-col gap-16 md:gap-24">

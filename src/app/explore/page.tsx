@@ -18,6 +18,16 @@ export default function ExplorePage() {
       setIsLoading(false);
     };
     fetchExperiences();
+
+    // Read search query from URL if present
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      const c = params.get('c'); // Handle category click from homepage
+      
+      if (q) setSearchQuery(q);
+      else if (c) setSearchQuery(c);
+    }
   }, []);
 
   const filteredExperiences = experiences.filter(exp => 
