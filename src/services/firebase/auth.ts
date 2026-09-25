@@ -78,6 +78,7 @@ export const signInWithEmail = async (
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const userData = await getUserData(userCredential.user.uid);
+        if (!userData) throw new Error("User document missing");
         return userData;
     } catch (error: any) {
         throw handleAuthError(error);
@@ -94,13 +95,21 @@ export const signInWithGoogle = async (): Promise<User> => {
         const { user } = userCredential;
 
         // Check if user exists in Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        let userDoc;
+        try {
+            console.log("1. Attempting to read user doc:", user.uid);
+            userDoc = await getDoc(doc(db, 'users', user.uid));
+            console.log("2. Read successful. Exists?", userDoc.exists());
+        } catch (e: any) {
+            console.error("ERROR AT STEP 1 (Reading user doc):", e.message);
+            throw e;
+        }
 
         if (!userDoc.exists()) {
             // Create new user document
             const userData: Omit<User, 'id'> = {
                 email: user.email || '',
-                username: user.email?.split('@')[0].toLowerCase() || '',
+                username: user.displayName?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || user.email?.split('@')[0].toLowerCase() || '',
                 displayName: user.displayName || '',
                 bio: '',
                 profilePic: user.photoURL || '',
@@ -118,16 +127,25 @@ export const signInWithGoogle = async (): Promise<User> => {
                 updatedAt: new Date(),
             };
 
-            await setDoc(doc(db, 'users', user.uid), {
-                ...userData,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-            });
+            try {
+                console.log("3. Attempting to create user doc...");
+                await setDoc(doc(db, 'users', user.uid), {
+                    ...userData,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                });
+                console.log("4. Write successful.");
+            } catch (e: any) {
+                console.error("ERROR AT STEP 3 (Writing user doc):", e.message);
+                throw e;
+            }
 
             return { id: user.uid, ...userData };
         }
 
-        return await getUserData(user.uid);
+        const userData = await getUserData(user.uid);
+        if (!userData) throw new Error("User document missing");
+        return userData;
     } catch (error: any) {
         throw handleAuthError(error);
     }
@@ -158,11 +176,11 @@ export const resetPassword = async (email: string): Promise<void> => {
 /**
  * Get user data from Firestore
  */
-export const getUserData = async (userId: string): Promise<User> => {
+export const getUserData = async (userId: string): Promise<User | null> => {
     const userDoc = await getDoc(doc(db, 'users', userId));
 
     if (!userDoc.exists()) {
-        throw new Error('User not found');
+        return null;
     }
 
     const data = userDoc.data();

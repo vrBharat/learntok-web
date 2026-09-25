@@ -1,31 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { Mail, Lock, BookOpen, Chrome } from 'lucide-react';
-import { signIn, googleSignIn, clearError } from '@/store/slices/authSlice';
+import { googleSignIn, clearError } from '@/store/slices/authSlice';
 import { AppDispatch, RootState } from '@/store';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { Text } from '@/components/ui/Text';
-import { View } from '@/components/ui/View';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
     const { isLoading, error } = useSelector((state: RootState) => state.auth);
-
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        dispatch(clearError());
-        const result = await dispatch(signIn({ email, password }));
-        if (signIn.fulfilled.match(result)) {
-            router.push('/');
-        }
-    };
 
     const handleGoogleSignIn = async () => {
         dispatch(clearError());
@@ -36,76 +20,38 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background px-4">
-            <View className="w-full max-w-md gap-8 p-8 bg-surface rounded-3xl border border-border shadow-2xl">
-                <div className="flex flex-col items-center gap-2">
-                    <div className="bg-primary p-3 rounded-2xl shadow-glow">
-                        <BookOpen size={32} className="text-white" />
-                    </div>
-                    <Text variant="h2">Welcome Back</Text>
-                    <Text variant="caption">Continue your learning journey</Text>
+        <div className="flex min-h-screen items-center justify-center bg-[#fdfaf6] text-black px-4 font-sans">
+            <div className="w-full max-w-sm p-8 bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-6">
+                <div className="flex flex-col items-center gap-2 text-center">
+                    <h2 className="text-2xl font-bold tracking-tight">LEARN//TALK</h2>
+                    <p className="text-sm font-mono text-gray-600">Sign in or create an account.</p>
                 </div>
 
-                <form onSubmit={handleLogin} className="flex flex-col gap-4">
-                    <Input
-                        label="Email Address"
-                        type="email"
-                        placeholder="name@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        icon={<Mail size={18} />}
-                        required
-                    />
-                    <Input
-                        label="Password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        icon={<Lock size={18} />}
-                        required
-                    />
-
-                    {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
-                            {error}
-                        </div>
-                    )}
-
-                    <Button type="submit" variant="primary" size="full" isLoading={isLoading}>
-                        Sign In
-                    </Button>
-                </form>
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-border" />
+                {error && (
+                    <div className="p-3 bg-red-100 border border-red-500 text-red-700 text-sm font-mono">
+                        {error}
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-surface px-2 text-text-tertiary">Or continue with</span>
-                    </div>
-                </div>
+                )}
 
-                <Button
-                    variant="outline"
-                    size="full"
+                <button
                     onClick={handleGoogleSignIn}
-                    className="gap-2"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 bg-black text-white font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                    <Chrome size={20} />
-                    Google
-                </Button>
+                    {isLoading ? 'LOADING...' : 'CONTINUE WITH GOOGLE'}
+                </button>
 
-                <Text variant="caption" className="text-center">
-                    Don't have an account?{' '}
-                    <button
-                        onClick={() => router.push('/auth/signup')}
-                        className="text-primary font-semibold hover:underline"
-                    >
-                        Sign Up
-                    </button>
-                </Text>
-            </View>
+                <div className="text-center mt-4">
+                    <p className="text-sm font-mono mt-2">
+                        <button
+                            onClick={() => router.push('/')}
+                            className="text-gray-500 hover:underline"
+                        >
+                            ← Back home
+                        </button>
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,105 +1,117 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '@/store';
-import { fetchVideos, fetchFollowingVideos } from '@/store/slices/videoSlice';
-import { View } from '@/components/ui/View';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import AppLayout from '@/components/AppLayout';
-import { VideoCard } from '@/components/VideoCard';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Search } from 'lucide-react';
+import ExperienceCard from '@/components/ExperienceCard';
+import { getExperiences, ExperienceData } from '@/services/firebase/experiences';
 
 export default function Home() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const { videos, isLoading, error } = useSelector((state: RootState) => state.video);
-
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [feedType, setFeedType] = useState<'for-you' | 'following'>('for-you');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recentExperiences, setRecentExperiences] = useState<ExperienceData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (feedType === 'for-you') {
-      dispatch(fetchVideos({ refresh: true }));
-    } else if (feedType === 'following' && user) {
-      dispatch(fetchFollowingVideos({ userId: user.id, refresh: true }));
-    }
-  }, [dispatch, feedType, user]);
+    const fetchRecent = async () => {
+      setIsLoading(true);
+      const data = await getExperiences(3);
+      setRecentExperiences(data);
+      setIsLoading(false);
+    };
+    fetchRecent();
+  }, []);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const scrollTop = e.currentTarget.scrollTop;
-    const itemHeight = e.currentTarget.clientHeight;
-    const index = Math.round(scrollTop / itemHeight);
-    if (index !== activeIndex) {
-      setActiveIndex(index);
-    }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Searching for:', searchQuery);
   };
 
   return (
-    <AppLayout>
-      {/* Feed Tabs Feed */}
-      <div className="absolute top-4 left-0 right-0 z-20 flex justify-center gap-6 pointer-events-none">
-        <button
-          onClick={() => setFeedType('following')}
-          disabled={!isAuthenticated}
-          className={cn(
-            "pointer-events-auto text-lg font-bold transition-all drop-shadow-lg",
-            feedType === 'following' ? "text-white underline underline-offset-8 decoration-2" : "text-white/60 hover:text-white/80",
-            !isAuthenticated && "opacity-30 cursor-not-allowed"
-          )}
-        >
-          Following
-        </button>
-        <div className="w-[1px] h-6 bg-white/20 mt-1" />
-        <button
-          onClick={() => setFeedType('for-you')}
-          className={cn(
-            "pointer-events-auto text-lg font-bold transition-all drop-shadow-lg",
-            feedType === 'for-you' ? "text-white underline underline-offset-8 decoration-2" : "text-white/60 hover:text-white/80"
-          )}
-        >
-          For You
-        </button>
-      </div>
+    <main className="w-full max-w-4xl mx-auto px-4 py-8 md:py-16 flex flex-col gap-16 md:gap-24">
+      {/* Hero Section */}
+      <section className="flex flex-col items-center text-center gap-6 mt-4 md:mt-8">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight max-w-3xl">
+          find someone who's already been where you're going.
+        </h1>
+        <p className="text-base md:text-xl font-mono text-gray-700 max-w-2xl px-2">
+          Real experiences from people who've actually done the thing.
+        </p>
 
-      <div
-        className="video-feed w-full max-w-lg mx-auto overflow-y-scroll snap-y snap-mandatory h-screen scrollbar-none"
-        onScroll={handleScroll}
-      >
-        {isLoading && videos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <Text variant="caption">Loading personalized feed...</Text>
+        <form onSubmit={handleSearch} className="w-full max-w-2xl mt-4 md:mt-8 flex flex-col gap-3">
+          <div className="relative flex items-center w-full">
+            <Search className="absolute left-4 w-5 h-5 text-gray-500" />
+            <input 
+              type="text" 
+              placeholder="What are you trying to do?"
+              className="w-full border-2 border-black bg-white py-3 md:py-4 pl-12 pr-4 text-base md:text-lg outline-none focus:ring-4 focus:ring-blue-500/20 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-mono"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8">
-            <Text variant="h3">Something went wrong</Text>
-            <Text variant="caption">{error}</Text>
-            <Button onClick={() => dispatch(fetchVideos({ refresh: true }))}>Try Again</Button>
-          </div>
-        ) : videos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8">
-            <Text variant="h3">No videos found</Text>
-            <Text variant="caption">
-              {feedType === 'following'
-                ? "Follow some creators to see their latest educational shorts here!"
-                : "Be the first to upload an educational short!"}
-            </Text>
-            {feedType === 'following' ? (
-              <Button variant="primary" onClick={() => setFeedType('for-you')}>Discover Creators</Button>
-            ) : (
-              <Button variant="primary">Become a Creator</Button>
-            )}
-          </div>
-        ) : (
-          videos.map((video, index) => (
-            <div key={video.id} className="snap-start w-full h-full flex items-center justify-center">
-              <VideoCard video={video} isActive={index === activeIndex} />
+          <button 
+            type="submit" 
+            className="w-full md:w-auto self-center mt-4 py-3 px-8 bg-[#0000FF] text-white font-bold border-2 border-black hover:bg-blue-800 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-none"
+          >
+            FIND EXPERIENCES →
+          </button>
+          <p className="text-xs font-mono text-gray-500 mt-2 md:mt-4 px-4">
+            no gurus. no generic advice. just real experiences.
+          </p>
+        </form>
+      </section>
+
+      {/* Categories Section */}
+      <section className="w-full">
+        <h2 className="text-xl font-bold tracking-tighter border-b-2 border-black pb-2 mb-6">
+          people are figuring out...
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 font-mono text-sm">
+          <Link href="/explore?c=career" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
+            <span className="group-hover:underline text-blue-600">CAREER</span>
+            <span className="text-gray-500 text-xs">1,248 experiences</span>
+          </Link>
+          <Link href="/explore?c=moving" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
+            <span className="group-hover:underline text-blue-600">MOVING</span>
+            <span className="text-gray-500 text-xs">823 experiences</span>
+          </Link>
+          <Link href="/explore?c=education" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
+            <span className="group-hover:underline text-blue-600">EDUCATION</span>
+            <span className="text-gray-500 text-xs">741 experiences</span>
+          </Link>
+          <Link href="/explore?c=business" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
+            <span className="group-hover:underline text-blue-600">BUSINESS</span>
+            <span className="text-gray-500 text-xs">602 experiences</span>
+          </Link>
+          <Link href="/explore?c=languages" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
+            <span className="group-hover:underline text-blue-600">LANGUAGES</span>
+            <span className="text-gray-500 text-xs">542 experiences</span>
+          </Link>
+          <Link href="/explore?c=freelancing" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
+            <span className="group-hover:underline text-blue-600">FREELANCING</span>
+            <span className="text-gray-500 text-xs">499 experiences</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Featured Experiences */}
+      <section className="w-full">
+        <h2 className="text-xl font-bold tracking-tighter border-b-2 border-black pb-2 mb-6">
+          recently lived
+        </h2>
+        <div className="flex flex-col gap-6">
+          {isLoading ? (
+            <div className="font-mono text-sm text-gray-500">Loading recent experiences...</div>
+          ) : recentExperiences.length > 0 ? (
+            recentExperiences.map(exp => (
+              <ExperienceCard key={exp.id} experience={exp} />
+            ))
+          ) : (
+            <div className="p-8 border-2 border-dashed border-gray-300 text-center font-mono text-gray-500">
+              No recent experiences found. Share your journey!
             </div>
-          ))
-        )}
-      </div>
-    </AppLayout>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }

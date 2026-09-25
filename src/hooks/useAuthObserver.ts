@@ -15,7 +15,12 @@ export const useAuthObserver = () => {
             if (firebaseUser) {
                 try {
                     const userData = await getUserData(firebaseUser.uid);
-                    dispatch(setUser(userData));
+                    if (userData) {
+                        dispatch(setUser(userData));
+                    } else {
+                        // User exists in Auth but not Firestore (e.g. during sign-up race condition)
+                        dispatch(setUser(null));
+                    }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
                     dispatch(setUser(null));
