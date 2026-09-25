@@ -18,7 +18,7 @@ export default function GlobalNavbar() {
             <rect width="68" height="32" fill="black"/>
             <text x="34" y="22" fill="white" fontSize="16" fontWeight="900" fontFamily="sans-serif" textAnchor="middle" letterSpacing="1">LEARN</text>
             <rect x="68" y="0" width="72" height="32" fill="transparent" stroke="black" strokeWidth="4"/>
-            <text x="104" y="22" fill="black" fontSize="16" fontWeight="900" fontFamily="sans-serif" textAnchor="middle" letterSpacing="1">TALK</text>
+            <text x="104" y="22" fill="black" fontSize="16" fontWeight="900" fontFamily="sans-serif" textAnchor="middle" letterSpacing="1">TOK</text>
           </svg>
         </Link>
 

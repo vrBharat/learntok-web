@@ -16,7 +16,7 @@ export const Header = () => {
         <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between glass-effect px-4 md:px-8">
             <div className="flex items-center gap-2 md:hidden" onClick={() => router.push('/')}>
                 <BookOpen size={24} className="text-primary" />
-                <span className="text-lg font-bold text-text-primary tracking-tight">learntok.in</span>
+                <span className="text-lg font-bold text-text-primary tracking-tight">LearnTok</span>
             </div>
 
             <div className="hidden md:flex flex-1 max-w-xl mx-auto px-4">

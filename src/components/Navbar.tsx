@@ -25,7 +25,7 @@ export const Navbar = () => {
                     <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                         <BookOpen size={24} className="text-primary" />
                     </div>
-                    <span className="text-xl font-bold text-text-primary tracking-tight">learntok.in</span>
+                    <span className="text-xl font-bold text-text-primary tracking-tight">LearnTok</span>
                 </div>
 
                 <div className="flex flex-col gap-1.5">

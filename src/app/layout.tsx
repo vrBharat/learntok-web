@@ -9,7 +9,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "learntok.in | Find people who've already done it",
+  title: "LearnTok | Find people who've already done it",
   description: "Discover real experiences from people who've already done what you're trying to do.",
 };
 
