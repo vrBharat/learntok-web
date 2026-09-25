@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { getExperienceById, ExperienceData } from '@/services/firebase/experiences';
+import { getExperienceById, deleteExperience, ExperienceData } from '@/services/firebase/experiences';
 import { getQuestionsForExperience, addQuestion, replyToQuestion, QuestionData } from '@/services/firebase/questions';
 
 export default function ExperienceDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -62,6 +62,19 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
     }
   };
 
+  const handleDeleteExperience = async () => {
+    if (confirm("Are you sure you want to delete this experience? This action cannot be undone.")) {
+      try {
+        await deleteExperience(resolvedParams.id);
+        alert("Experience deleted.");
+        router.push('/explore');
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete experience.");
+      }
+    }
+  };
+
   const handleReply = async (questionId: string) => {
     if (!replyText.trim()) return;
     try {
@@ -103,9 +116,19 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
 
         {/* Header */}
         <div className="mb-8 md:mb-12 border-b-2 border-black pb-6 md:pb-8">
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tighter leading-tight mb-4 md:mb-6">
-            {experience.title}
-          </h1>
+          <div className="flex justify-between items-start gap-4 mb-4 md:mb-6">
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tighter leading-tight">
+              {experience.title}
+            </h1>
+            {isAuthenticated && user?.id === experience.userId && (
+              <button 
+                onClick={handleDeleteExperience}
+                className="py-2 px-4 bg-red-600 text-white font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none whitespace-nowrap uppercase tracking-widest"
+              >
+                Delete
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 font-mono text-xs md:text-sm">
             <Link href={`/u/${experience.author}`} className="font-bold text-blue-600 hover:underline">@{experience.author}</Link>
             <span className="text-gray-400 hidden sm:inline">|</span>

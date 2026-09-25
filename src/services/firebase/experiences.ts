@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer } from 'firebase/firestore';
+import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer, deleteDoc } from 'firebase/firestore';
 import { db } from './config';
 
 export interface ExperienceData {
@@ -102,4 +102,14 @@ export const getCategoryCounts = async (): Promise<Record<string, number>> => {
     console.error("Error getting category counts: ", error);
   }
   return counts;
+};
+
+export const deleteExperience = async (id: string): Promise<void> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error("Error deleting experience: ", error);
+    throw error;
+  }
 };
