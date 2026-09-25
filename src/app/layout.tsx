@@ -5,6 +5,7 @@ import { ReduxProvider } from "@/store/ReduxProvider";
 import { AuthInit } from "@/components/AuthInit";
 import GlobalNavbar from "@/components/GlobalNavbar";
 import GlobalFooter from "@/components/GlobalFooter";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,6 +29,7 @@ export default function RootLayout({
               {children}
             </div>
             <GlobalFooter />
+            <FeedbackWidget />
           </AuthInit>
         </ReduxProvider>
       </body>

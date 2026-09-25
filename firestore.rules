@@ -28,5 +28,12 @@ service cloud.firestore {
       );
       allow delete: if request.auth != null && resource.data.askerId == request.auth.uid;
     }
+
+    // ==================== FEEDBACK RULES ====================
+    match /feedback/{feedbackId} {
+      // Anyone can submit feedback, but they can't read others' feedback
+      allow create: if true;
+      allow read, update, delete: if false; 
+    }
   }
 }
