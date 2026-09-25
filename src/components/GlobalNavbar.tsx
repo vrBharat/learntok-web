@@ -28,18 +28,25 @@ export default function GlobalNavbar() {
           <Link href="/about" className="hover:underline text-blue-600">About</Link>
         </nav>
 
-        <div className="flex items-center gap-4 font-mono text-xs md:text-sm">
+        <div className="flex items-center gap-2 md:gap-4 font-mono text-[10px] md:text-sm">
           {isAuthenticated ? (
-            <div className="flex items-center gap-4">
-              <Link href={`/u/${user?.username}`} className="hover:underline text-black font-bold">
+            <div className="flex items-center gap-2 md:gap-3">
+              <Link 
+                href={`/u/${user?.username}`} 
+                className="bg-[#0000FF] text-white px-2 md:px-3 py-1 font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-px active:translate-x-px active:shadow-none transition-all max-w-[80px] md:max-w-[150px] truncate block"
+              >
                 @{user?.username}
               </Link>
-              <button onClick={() => dispatch(logout())} className="hover:underline text-gray-500">
-                [Logout]
+              <button 
+                onClick={() => dispatch(logout())} 
+                className="bg-white text-black px-2 md:px-3 py-1 font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 active:translate-y-px active:translate-x-px active:shadow-none transition-all"
+                title="Logout"
+              >
+                LOGOUT
               </button>
             </div>
           ) : (
-            <Link href="/auth/login" className="hover:underline font-bold text-black border border-black px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-px active:translate-x-px active:shadow-none bg-white transition-all">
+            <Link href="/auth/login" className="hover:underline font-bold text-black border-2 border-black px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-px active:translate-x-px active:shadow-none bg-white transition-all text-xs md:text-sm">
               Login
             </Link>
           )}
