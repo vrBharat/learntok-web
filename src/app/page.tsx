@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import ExperienceCard from '@/components/ExperienceCard';
-import { getExperiences, ExperienceData } from '@/services/firebase/experiences';
+import { getExperiences, getCategoryCounts, ExperienceData } from '@/services/firebase/experiences';
 
   import { useRouter } from 'next/navigation';
 
@@ -12,6 +12,7 @@ import { getExperiences, ExperienceData } from '@/services/firebase/experiences'
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [recentExperiences, setRecentExperiences] = useState<ExperienceData[]>([]);
+    const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -21,7 +22,13 @@ import { getExperiences, ExperienceData } from '@/services/firebase/experiences'
         setRecentExperiences(data);
         setIsLoading(false);
       };
+      const fetchCounts = async () => {
+        const counts = await getCategoryCounts();
+        setCategoryCounts(counts);
+      };
+      
       fetchRecent();
+      fetchCounts();
     }, []);
 
     const handleSearch = (e: React.FormEvent) => {
@@ -75,21 +82,27 @@ import { getExperiences, ExperienceData } from '@/services/firebase/experiences'
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 font-mono text-sm">
           <Link href="/explore?c=career" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
             <span className="group-hover:underline text-blue-600">CAREER</span>
+            <span className="text-gray-500 text-xs">{categoryCounts['career'] || 0} experiences</span>
           </Link>
           <Link href="/explore?c=moving" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
             <span className="group-hover:underline text-blue-600">MOVING</span>
+            <span className="text-gray-500 text-xs">{categoryCounts['moving'] || 0} experiences</span>
           </Link>
           <Link href="/explore?c=education" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
             <span className="group-hover:underline text-blue-600">EDUCATION</span>
+            <span className="text-gray-500 text-xs">{categoryCounts['education'] || 0} experiences</span>
           </Link>
           <Link href="/explore?c=business" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
             <span className="group-hover:underline text-blue-600">BUSINESS</span>
+            <span className="text-gray-500 text-xs">{categoryCounts['business'] || 0} experiences</span>
           </Link>
           <Link href="/explore?c=languages" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
             <span className="group-hover:underline text-blue-600">LANGUAGES</span>
+            <span className="text-gray-500 text-xs">{categoryCounts['languages'] || 0} experiences</span>
           </Link>
           <Link href="/explore?c=freelancing" className="flex items-center justify-between hover:bg-gray-100 p-2 -mx-2 group">
             <span className="group-hover:underline text-blue-600">FREELANCING</span>
+            <span className="text-gray-500 text-xs">{categoryCounts['freelancing'] || 0} experiences</span>
           </Link>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where } from 'firebase/firestore';
+import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer } from 'firebase/firestore';
 import { db } from './config';
 
 export interface ExperienceData {
@@ -81,4 +81,25 @@ export const getExperienceById = async (id: string): Promise<ExperienceData | nu
     console.error("Error getting experience: ", error);
     return null;
   }
+};
+
+export const getCategoryCounts = async (): Promise<Record<string, number>> => {
+  const categories = ['Career', 'Moving', 'Education', 'Business', 'Languages', 'Freelancing'];
+  const counts: Record<string, number> = {};
+  
+  try {
+    // Also fetch lower case for case-insensitivity or depending on how it's saved
+    for (const cat of categories) {
+      const q = query(collection(db, COLLECTION_NAME), where('category', '==', cat.toLowerCase()));
+      const snapshot = await getCountFromServer(q);
+      
+      const qCap = query(collection(db, COLLECTION_NAME), where('category', '==', cat));
+      const snapshotCap = await getCountFromServer(qCap);
+
+      counts[cat.toLowerCase()] = snapshot.data().count + snapshotCap.data().count;
+    }
+  } catch (error) {
+    console.error("Error getting category counts: ", error);
+  }
+  return counts;
 };
