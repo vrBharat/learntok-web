@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { getExperienceById, deleteExperience, ExperienceData } from '@/services/firebase/experiences';
 import { getQuestionsForExperience, addQuestion, replyToQuestion, QuestionData } from '@/services/firebase/questions';
+import ShareableExperienceCard from '@/components/ShareableExperienceCard';
 
 export default function ExperienceDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -166,6 +167,21 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
                 <span className="font-bold">{experience.duration || 'N/A'}</span>
               </div>
             </div>
+          </section>
+
+          {/* SHARE CARD */}
+          <section className="mt-12 pt-12 border-t border-dashed border-gray-400 flex flex-col items-center">
+            <h2 className="text-2xl font-bold tracking-tighter mb-2 self-start">SPREAD THE WORD</h2>
+            <p className="text-sm font-mono text-gray-600 mb-8 self-start">Share this experience to inspire others.</p>
+            <ShareableExperienceCard 
+              userName={experience.author}
+              experienceTitle={experience.title}
+              keyTakeaway={
+                experience.goal 
+                  ? (experience.goal.length > 150 ? experience.goal.substring(0, 150) + '...' : experience.goal)
+                  : "Discovering real experiences from people who've actually done the thing."
+              }
+            />
           </section>
 
           {/* Q&A */}
