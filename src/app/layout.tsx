@@ -6,6 +6,7 @@ import { AuthInit } from "@/components/AuthInit";
 import GlobalNavbar from "@/components/GlobalNavbar";
 import GlobalFooter from "@/components/GlobalFooter";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
             <FeedbackWidget />
           </AuthInit>
         </ReduxProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
