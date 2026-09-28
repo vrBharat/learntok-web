@@ -122,12 +122,20 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
               {experience.title}
             </h1>
             {isAuthenticated && user?.id === experience.userId && (
-              <button 
-                onClick={handleDeleteExperience}
-                className="py-2 px-4 bg-red-600 text-white font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none whitespace-nowrap uppercase tracking-widest"
-              >
-                Delete
-              </button>
+              <div className="flex gap-2">
+                <Link 
+                  href={`/experience/${resolvedParams.id}/edit`}
+                  className="py-2 px-4 bg-[#0000FF] text-white font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none whitespace-nowrap uppercase tracking-widest flex items-center justify-center"
+                >
+                  Edit
+                </Link>
+                <button 
+                  onClick={handleDeleteExperience}
+                  className="py-2 px-4 bg-red-600 text-white font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none whitespace-nowrap uppercase tracking-widest"
+                >
+                  Delete
+                </button>
+              </div>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 font-mono text-xs md:text-sm">

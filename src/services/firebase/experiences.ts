@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer, deleteDoc } from 'firebase/firestore';
+import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from './config';
 
 export interface ExperienceData {
@@ -113,3 +113,19 @@ export const deleteExperience = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+export const updateExperience = async (id: string, data: Partial<ExperienceData>) => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    // Remove id and userId to prevent accidental overwrite if they exist in data
+    const { id: _id, userId: _userId, createdAt: _createdAt, ...updateData } = data as any;
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error updating experience: ", error);
+    throw error;
+  }
+};
+
