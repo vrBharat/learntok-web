@@ -11,8 +11,49 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LearnTok | Find people who've already done it",
-  description: "Discover real experiences from people who've already done what you're trying to do.",
+  metadataBase: new URL('https://learntok.in'),
+  title: {
+    default: "LearnTok | Find people who've already done it",
+    template: "%s | LearnTok",
+  },
+  description: "LearnTok is the best platform to discover real, authentic experiences from people who've already done what you're trying to do. Share knowledge, get advice, and learn from others on LearnTok.",
+  keywords: ["LearnTok", "real experiences", "mentorship", "learning", "career advice", "moving abroad", "how to"],
+  authors: [{ name: "LearnTok" }],
+  creator: "LearnTok",
+  publisher: "LearnTok",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://learntok.in",
+    siteName: "LearnTok",
+    title: "LearnTok | Find people who've already done it",
+    description: "Discover real experiences from people who've already done what you're trying to do on LearnTok.",
+    images: [
+      {
+        url: "/og-image.png", // Add an og-image.png to your public folder
+        width: 1200,
+        height: 630,
+        alt: "LearnTok - Real Experiences",
+      }
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LearnTok | Find people who've already done it",
+    description: "Discover real experiences from people who've already done what you're trying to do on LearnTok.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
