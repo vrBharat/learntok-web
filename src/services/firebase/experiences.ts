@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer, deleteDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from './config';
 
 export interface ExperienceData {
@@ -15,6 +15,7 @@ export interface ExperienceData {
   year: string;
   quote?: string;
   createdAt?: any;
+  views?: number;
 }
 
 const COLLECTION_NAME = 'experiences';
@@ -126,6 +127,17 @@ export const updateExperience = async (id: string, data: Partial<ExperienceData>
   } catch (error) {
     console.error("Error updating experience: ", error);
     throw error;
+  }
+};
+
+export const incrementViewCount = async (id: string): Promise<void> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    await updateDoc(docRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    console.error("Error incrementing view count: ", error);
   }
 };
 

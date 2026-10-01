@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ExperienceData } from '@/services/firebase/experiences';
 
 export default function ExperienceCard({ experience }: { experience: ExperienceData }) {
-  const { id, title, author, category, origin, destination, duration, cost, year, quote } = experience;
+  const { id, title, author, category, origin, destination, duration, cost, year, quote, views } = experience;
   
   return (
     <div className="border border-black bg-white p-4 md:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
@@ -45,6 +45,13 @@ export default function ExperienceCard({ experience }: { experience: ExperienceD
           <Link href={`/u/${author}`} className="hover:underline text-blue-600">
             @{author}
           </Link>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-gray-500 text-[10px] uppercase">Views</span>
+          <span className="flex items-center gap-1.5 font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            {views || 0}
+          </span>
         </div>
       </div>
       

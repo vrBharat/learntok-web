@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { getExperienceById, deleteExperience, ExperienceData } from '@/services/firebase/experiences';
+import { getExperienceById, deleteExperience, ExperienceData, incrementViewCount } from '@/services/firebase/experiences';
 import { getQuestionsForExperience, addQuestion, replyToQuestion, QuestionData } from '@/services/firebase/questions';
 import ShareableExperienceCard from '@/components/ShareableExperienceCard';
 
@@ -31,6 +31,14 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
       if (data) {
         const qData = await getQuestionsForExperience(resolvedParams.id);
         setQuestions(qData);
+        
+        // Handle View Count Increment
+        const viewKey = `viewed_${resolvedParams.id}`;
+        if (!localStorage.getItem(viewKey)) {
+          incrementViewCount(resolvedParams.id)
+            .then(() => localStorage.setItem(viewKey, 'true'))
+            .catch(err => console.error("Failed to increment view:", err));
+        }
       }
       setIsLoading(false);
     };
@@ -165,7 +173,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
           {/* QUICK FACTS */}
           <section className="bg-white border-2 border-black p-6 font-mono text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <h2 className="font-bold text-lg mb-4 font-sans tracking-tighter">THE DETAILS</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <span className="text-gray-500 text-xs block mb-1">COST</span>
                 <span className="font-bold">{experience.cost || 'N/A'}</span>
@@ -173,6 +181,13 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
               <div>
                 <span className="text-gray-500 text-xs block mb-1">TIME TAKEN</span>
                 <span className="font-bold">{experience.duration || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 text-xs block mb-1">VIEWS</span>
+                <span className="font-bold flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                  {experience.views || 0}
+                </span>
               </div>
             </div>
           </section>

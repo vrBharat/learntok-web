@@ -12,8 +12,11 @@ service cloud.firestore {
       allow read: if true; 
       // Must be logged in and the payload userId must match their auth uid
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      // Only the author can update or delete
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Only the author can delete
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Author can update everything, anyone can update just the views field
+      allow update: if (request.auth != null && resource.data.userId == request.auth.uid) || 
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
     }
 
     // ==================== QUESTIONS RULES ====================
