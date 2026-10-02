@@ -1,15 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Home, Search, PlusSquare, Bell, User, BookOpen } from 'lucide-react';
+import { Home, User, BookOpen } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const navItems = [
     { icon: Home, label: 'Home', href: '/' },
-    { icon: Search, label: 'Discover', href: '/search' },
-    { icon: PlusSquare, label: 'Upload', href: '/upload' },
-    { icon: Bell, label: 'Inbox', href: '/notifications' },
     { icon: User, label: 'Profile', href: '/profile' },
 ];
 

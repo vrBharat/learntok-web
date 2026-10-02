@@ -1,5 +1,5 @@
 'use client';
-
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -37,7 +37,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
         if (!localStorage.getItem(viewKey)) {
           incrementViewCount(resolvedParams.id)
             .then(() => localStorage.setItem(viewKey, 'true'))
-            .catch(err => console.error("Failed to increment view:", err));
+            .catch(err => logger.error("Failed to increment view:", err));
         }
       }
       setIsLoading(false);
@@ -64,7 +64,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
       }]);
       setNewQuestionText('');
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       alert("Failed to ask question. Remember to check Firebase console if an index is required!");
     } finally {
       setIsSubmittingQuestion(false);
@@ -78,7 +78,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
         alert("Experience deleted.");
         router.push('/explore');
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         alert("Failed to delete experience.");
       }
     }
@@ -92,7 +92,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
       setReplyingToId(null);
       setReplyText('');
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       alert("Failed to post reply.");
     }
   };

@@ -33,138 +33,15 @@ export interface Badge {
     earnedAt: Date;
 }
 
-// Video Types
-export interface Video {
-    id: string;
-    creatorId: string;
-    creator?: User;
-    videoUrl: string;
-    thumbnailUrl: string;
-    title: string;
-    description: string;
-    category: Category;
-    hashtags: string[];
-    duration: number;
-    likesCount: number;
-    commentsCount: number;
-    viewsCount: number;
-    sharesCount: number;
-    savesCount: number;
-    status: VideoStatus;
-    isLiked?: boolean;
-    isSaved?: boolean;
-    transcript?: string;
-    aiSummary?: string;
-    quiz?: Quiz;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export type VideoStatus = 'pending' | 'approved' | 'rejected' | 'deleted';
-
+// Experience Categories
 export type Category =
-    | 'Mathematics'
-    | 'Science'
-    | 'History'
-    | 'Technology'
-    | 'Languages'
-    | 'Art'
+    | 'Career'
+    | 'Moving'
+    | 'Education'
     | 'Business'
+    | 'Languages'
+    | 'Freelancing'
     | 'Other';
-
-// Comment Types
-export interface Comment {
-    id: string;
-    videoId: string;
-    userId: string;
-    user?: User;
-    text: string;
-    likesCount: number;
-    isLiked?: boolean;
-    replies?: Comment[];
-    parentId?: string;
-    createdAt: Date;
-}
-
-// Like Types
-export interface Like {
-    id: string;
-    userId: string;
-    videoId: string;
-    createdAt: Date;
-}
-
-// Save Types
-export interface SavedVideo {
-    id: string;
-    userId: string;
-    videoId: string;
-    video?: Video;
-    createdAt: Date;
-}
-
-// Follow Types
-export interface Follow {
-    id: string;
-    followerId: string;
-    followingId: string;
-    createdAt: Date;
-}
-
-// Watch History
-export interface WatchHistory {
-    id: string;
-    userId: string;
-    videoId: string;
-    video?: Video;
-    watchedAt: Date;
-    duration: number;
-    completed: boolean;
-}
-
-// AI Features
-export interface Quiz {
-    id: string;
-    videoId: string;
-    questions: QuizQuestion[];
-    createdAt: Date;
-}
-
-export interface QuizQuestion {
-    id: string;
-    question: string;
-    options: string[];
-    correctAnswer: number;
-    explanation: string;
-}
-
-export interface AISummary {
-    id: string;
-    videoId: string;
-    summary: string;
-    keyPoints: string[];
-    createdAt: Date;
-}
-
-export interface DoubtQuery {
-    id: string;
-    userId: string;
-    videoId: string;
-    question: string;
-    answer: string;
-    createdAt: Date;
-}
-
-// Note Types
-export interface Note {
-    id: string;
-    userId: string;
-    videoId: string;
-    videoTitle: string;
-    text: string;
-    timestampSeconds: number;
-    createdAt: Date;
-}
 
 // Notification Types
 export interface Notification {
@@ -179,58 +56,9 @@ export interface Notification {
 }
 
 export type NotificationType =
-    | 'like'
-    | 'comment'
-    | 'follow'
-    | 'video_approved'
-    | 'video_rejected'
-    | 'streak'
-    | 'badge'
+    | 'question'
+    | 'reply'
     | 'system';
-
-// Report Types
-export interface Report {
-    id: string;
-    reporterId: string;
-    videoId?: string;
-    commentId?: string;
-    userId?: string;
-    reason: ReportReason;
-    description: string;
-    status: ReportStatus;
-    createdAt: Date;
-}
-
-export type ReportReason =
-    | 'spam'
-    | 'inappropriate'
-    | 'harassment'
-    | 'misinformation'
-    | 'copyright'
-    | 'other';
-
-export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed';
-
-// Premium Subscription
-export interface Subscription {
-    id: string;
-    userId: string;
-    plan: SubscriptionPlan;
-    status: SubscriptionStatus;
-    startDate: Date;
-    endDate: Date;
-    autoRenew: boolean;
-}
-
-export type SubscriptionPlan = 'monthly' | 'yearly';
-export type SubscriptionStatus = 'active' | 'expired' | 'cancelled';
-
-// Upload Progress
-export interface UploadProgress {
-    progress: number;
-    status: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
-    error?: string;
-}
 
 // API Response Types
 export interface ApiResponse<T> {

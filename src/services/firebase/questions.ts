@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { collection, doc, addDoc, getDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './config';
 
@@ -25,7 +26,7 @@ export const addQuestion = async (experienceId: string, askerId: string, askerUs
     });
     return docRef.id;
   } catch (error) {
-    console.error("Error adding question: ", error);
+    logger.error("Error adding question: ", error);
     throw error;
   }
 };
@@ -43,7 +44,7 @@ export const getQuestionsForExperience = async (experienceId: string): Promise<Q
       ...doc.data()
     } as QuestionData));
   } catch (error) {
-    console.error("Error getting questions: ", error);
+    logger.error("Error getting questions: ", error);
     return [];
   }
 };
@@ -56,7 +57,7 @@ export const replyToQuestion = async (questionId: string, replyText: string) => 
       repliedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error("Error replying to question: ", error);
+    logger.error("Error replying to question: ", error);
     throw error;
   }
 };

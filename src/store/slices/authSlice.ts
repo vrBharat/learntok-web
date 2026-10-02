@@ -131,11 +131,7 @@ const authSlice = createSlice({
         setInitialized: (state, action: PayloadAction<boolean>) => {
             state.isInitialized = action.payload;
         },
-        updateFollowingCount: (state, action: PayloadAction<number>) => {
-            if (state.user) {
-                state.user.followingCount = (state.user.followingCount || 0) + action.payload;
-            }
-        },
+
     },
     extraReducers: (builder) => {
         // Sign Up
@@ -234,5 +230,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { setUser, clearError, setInitialized, updateFollowingCount } = authSlice.actions;
+export const { setUser, clearError, setInitialized } = authSlice.actions;
 export default authSlice.reducer;

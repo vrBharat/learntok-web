@@ -1,5 +1,5 @@
 'use client';
-
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { submitFeedback } from '@/services/firebase/feedback';
 import { useSelector } from 'react-redux';
@@ -37,7 +37,7 @@ export default function FeedbackWidget() {
         setMessage('');
       }, 3000);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       alert('Failed to submit. Please try again.');
     } finally {
       setIsSubmitting(false);

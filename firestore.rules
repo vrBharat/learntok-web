@@ -10,13 +10,23 @@ service cloud.firestore {
     // ==================== EXPERIENCES RULES ====================
     match /experiences/{expId} {
       allow read: if true; 
-      // Must be logged in and the payload userId must match their auth uid
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Must be logged in, payload userId must match, and strict data structure validated
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.author is string
+        && request.resource.data.category is string
+        && request.resource.data.duration is string
+        && request.resource.data.year is string
+        && request.resource.data.keys().hasAll(['userId', 'title', 'author', 'category', 'duration', 'year', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['userId', 'title', 'author', 'category', 'goal', 'origin', 'destination', 'duration', 'cost', 'year', 'quote', 'createdAt', 'views']);
       // Only the author can delete
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
       // Author can update everything, anyone can update just the views field
       allow update: if (request.auth != null && resource.data.userId == request.auth.uid) || 
-                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
+                       (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']));
     }
 
     // ==================== QUESTIONS RULES ====================
@@ -34,8 +44,12 @@ service cloud.firestore {
 
     // ==================== FEEDBACK RULES ====================
     match /feedback/{feedbackId} {
-      // Anyone can submit feedback, but they can't read others' feedback
-      allow create: if true;
+      // Must be logged in and payload must be valid
+      allow create: if request.auth != null
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.type in ['feedback', 'bug'];
       allow read, update, delete: if false; 
     }
   }

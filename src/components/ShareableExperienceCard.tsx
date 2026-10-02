@@ -1,5 +1,5 @@
-"use client";
-
+'use client';
+import { logger } from '@/lib/logger';
 import React, { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { Share2, Download, Check } from "lucide-react";
@@ -32,7 +32,7 @@ export default function ShareableExperienceCard({
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error("Failed to generate image", err);
+      logger.error("Failed to generate image", err);
     } finally {
       setIsGenerating(false);
     }
@@ -58,7 +58,7 @@ export default function ShareableExperienceCard({
         setTimeout(() => setCopied(false), 2000);
       }
     } catch (err) {
-      console.error("Failed to share", err);
+      logger.error("Failed to share", err);
     } finally {
       setIsGenerating(false);
     }

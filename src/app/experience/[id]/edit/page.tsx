@@ -1,5 +1,5 @@
 'use client';
-
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
@@ -70,7 +70,7 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
       alert('Experience updated successfully!');
       router.push(`/experience/${resolvedParams.id}`);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       alert('Failed to update experience.');
       setIsSubmitting(false);
     }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { collection, doc, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, where, getCountFromServer, deleteDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from './config';
 
@@ -29,7 +30,7 @@ export const addExperience = async (data: Omit<ExperienceData, 'id' | 'createdAt
     });
     return docRef.id;
   } catch (error) {
-    console.error("Error adding experience: ", error);
+    logger.error("Error adding experience: ", error);
     throw error;
   }
 };
@@ -47,7 +48,7 @@ export const getExperiences = async (max: number = 20): Promise<ExperienceData[]
       ...doc.data()
     } as ExperienceData));
   } catch (error) {
-    console.error("Error getting experiences: ", error);
+    logger.error("Error getting experiences: ", error);
     return [];
   }
 };
@@ -65,7 +66,7 @@ export const getExperiencesByUsername = async (username: string): Promise<Experi
       ...doc.data()
     })) as ExperienceData[];
   } catch (error) {
-    console.error("Error getting user experiences: ", error);
+    logger.error("Error getting user experiences: ", error);
     return [];
   }
 };
@@ -79,7 +80,7 @@ export const getExperienceById = async (id: string): Promise<ExperienceData | nu
     }
     return null;
   } catch (error) {
-    console.error("Error getting experience: ", error);
+    logger.error("Error getting experience: ", error);
     return null;
   }
 };
@@ -100,7 +101,7 @@ export const getCategoryCounts = async (): Promise<Record<string, number>> => {
       counts[cat.toLowerCase()] = snapshot.data().count + snapshotCap.data().count;
     }
   } catch (error) {
-    console.error("Error getting category counts: ", error);
+    logger.error("Error getting category counts: ", error);
   }
   return counts;
 };
@@ -110,7 +111,7 @@ export const deleteExperience = async (id: string): Promise<void> => {
     const docRef = doc(db, COLLECTION_NAME, id);
     await deleteDoc(docRef);
   } catch (error) {
-    console.error("Error deleting experience: ", error);
+    logger.error("Error deleting experience: ", error);
     throw error;
   }
 };
@@ -125,7 +126,7 @@ export const updateExperience = async (id: string, data: Partial<ExperienceData>
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error("Error updating experience: ", error);
+    logger.error("Error updating experience: ", error);
     throw error;
   }
 };
@@ -137,7 +138,7 @@ export const incrementViewCount = async (id: string): Promise<void> => {
       views: increment(1)
     });
   } catch (error) {
-    console.error("Error incrementing view count: ", error);
+    logger.error("Error incrementing view count: ", error);
   }
 };
 

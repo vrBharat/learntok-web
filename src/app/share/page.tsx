@@ -1,5 +1,5 @@
 'use client';
-
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
@@ -39,7 +39,7 @@ export default function SharePage() {
       alert('Experience published successfully!');
       router.push('/explore');
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       alert('Failed to publish experience.');
       setIsSubmitting(false);
     }

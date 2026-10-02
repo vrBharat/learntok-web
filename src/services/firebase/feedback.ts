@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './config';
 
@@ -20,7 +21,7 @@ export const submitFeedback = async (data: FeedbackData) => {
     });
     return docRef.id;
   } catch (error) {
-    console.error("Error adding feedback: ", error);
+    logger.error("Error adding feedback: ", error);
     throw error;
   }
 };
