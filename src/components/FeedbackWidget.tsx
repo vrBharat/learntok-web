@@ -2,6 +2,7 @@
 import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { submitFeedback } from '@/services/firebase/feedback';
+import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { usePathname } from 'next/navigation';
@@ -38,7 +39,7 @@ export default function FeedbackWidget() {
       }, 3000);
     } catch (error) {
       logger.error(error);
-      alert('Failed to submit. Please try again.');
+      toast.error('Failed to submit. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

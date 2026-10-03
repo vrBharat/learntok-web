@@ -7,6 +7,7 @@ import GlobalNavbar from "@/components/GlobalNavbar";
 import GlobalFooter from "@/components/GlobalFooter";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -74,6 +75,7 @@ export default function RootLayout({
             <FeedbackWidget />
           </AuthInit>
         </ReduxProvider>
+        <Toaster position="bottom-right" richColors />
         <SpeedInsights />
       </body>
     </html>

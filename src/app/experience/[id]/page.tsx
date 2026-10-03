@@ -8,6 +8,7 @@ import { RootState } from '@/store';
 import { getExperienceById, deleteExperience, ExperienceData, incrementViewCount } from '@/services/firebase/experiences';
 import { getQuestionsForExperience, addQuestion, replyToQuestion, QuestionData } from '@/services/firebase/questions';
 import ShareableExperienceCard from '@/components/ShareableExperienceCard';
+import { toast } from 'sonner';
 
 export default function ExperienceDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -47,7 +48,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
 
   const handleAskQuestion = async () => {
     if (!isAuthenticated || !user) {
-      alert("You must be logged in to ask a question.");
+      toast.error("You must be logged in to ask a question.");
       router.push('/auth/login');
       return;
     }
@@ -65,23 +66,33 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
       setNewQuestionText('');
     } catch (err) {
       logger.error(err);
-      alert("Failed to ask question. Remember to check Firebase console if an index is required!");
+      toast.error("Failed to ask question. Remember to check Firebase console if an index is required!");
     } finally {
       setIsSubmittingQuestion(false);
     }
   };
 
   const handleDeleteExperience = async () => {
-    if (confirm("Are you sure you want to delete this experience? This action cannot be undone.")) {
-      try {
-        await deleteExperience(resolvedParams.id);
-        alert("Experience deleted.");
-        router.push('/explore');
-      } catch (err) {
-        logger.error(err);
-        alert("Failed to delete experience.");
+    toast("Are you sure?", {
+      description: "This experience will be permanently deleted.",
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await deleteExperience(resolvedParams.id);
+            toast.success("Experience deleted.");
+            router.push('/explore');
+          } catch (err) {
+            logger.error(err);
+            toast.error("Failed to delete experience.");
+          }
+        }
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {}
       }
-    }
+    });
   };
 
   const handleReply = async (questionId: string) => {
@@ -93,7 +104,7 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
       setReplyText('');
     } catch (err) {
       logger.error(err);
-      alert("Failed to post reply.");
+      toast.error("Failed to post reply.");
     }
   };
 

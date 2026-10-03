@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { getExperienceById, updateExperience, ExperienceData } from '@/services/firebase/experiences';
+import { toast } from 'sonner';
 
 export default function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -26,7 +27,7 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
       const data = await getExperienceById(resolvedParams.id);
       if (data) {
         if (data.userId !== user?.id) {
-          alert("You are not authorized to edit this experience.");
+          toast.error("You are not authorized to edit this experience.");
           router.push(`/experience/${resolvedParams.id}`);
           return;
         }
@@ -38,7 +39,7 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
           cost: data.cost || '',
         });
       } else {
-        alert("Experience not found.");
+        toast.error("Experience not found.");
         router.push('/explore');
       }
       setIsLoading(false);
@@ -46,7 +47,7 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
     
     if (isInitialized) {
       if (!isAuthenticated) {
-        alert("You must be logged in to edit an experience.");
+        toast.error("You must be logged in to edit an experience.");
         router.push('/auth/login');
       } else {
         fetchExp();
@@ -57,7 +58,7 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated || !user) {
-      alert("You must be logged in to edit an experience.");
+      toast.error("You must be logged in to edit an experience.");
       router.push('/auth/login');
       return;
     }
@@ -67,11 +68,11 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
       await updateExperience(resolvedParams.id, {
         ...formData
       });
-      alert('Experience updated successfully!');
+      toast.success('Experience updated successfully!');
       router.push(`/experience/${resolvedParams.id}`);
     } catch (err) {
       logger.error(err);
-      alert('Failed to update experience.');
+      toast.error('Failed to update experience.');
       setIsSubmitting(false);
     }
   };

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { addExperience } from '@/services/firebase/experiences';
+import { toast } from 'sonner';
 
 export default function SharePage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function SharePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated || !user) {
-      alert("You must be logged in to share an experience.");
+      toast.error("You must be logged in to share an experience.");
       router.push('/auth/login');
       return;
     }
@@ -36,11 +37,11 @@ export default function SharePage() {
         author: user.username,
         year: year
       }, user.id);
-      alert('Experience published successfully!');
+      toast.success('Experience published successfully!');
       router.push('/explore');
     } catch (err) {
       logger.error(err);
-      alert('Failed to publish experience.');
+      toast.error('Failed to publish experience.');
       setIsSubmitting(false);
     }
   };
