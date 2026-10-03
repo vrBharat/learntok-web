@@ -8,6 +8,7 @@ import GlobalFooter from "@/components/GlobalFooter";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from 'sonner';
+import { headers } from 'next/headers';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,20 +52,22 @@ export const metadata: Metadata = {
       index: true,
       follow: true,
       'max-video-preview': -1,
-      'max-image-preview': 'large',
+      'max-image-preview': -1,
       'max-snippet': -1,
     },
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-[#fdfaf6] text-black antialiased min-h-screen flex flex-col`}>
+      <body className={`${inter.className} bg-[#fdfaf6] text-black antialiased min-h-screen flex flex-col`} nonce={nonce}>
         <ReduxProvider>
           <AuthInit>
             <GlobalNavbar />
