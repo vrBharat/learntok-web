@@ -180,6 +180,22 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
             </section>
           )}
 
+          {/* WHAT WORKED */}
+          {experience.whatWorked && (
+            <section>
+              <h2 className="text-xl font-bold tracking-tighter mb-4 inline-block border-b border-black text-green-700">WHAT WORKED</h2>
+              <p className="text-lg whitespace-pre-wrap">{experience.whatWorked}</p>
+            </section>
+          )}
+
+          {/* WHAT DIDN'T WORK */}
+          {experience.whatDidnt && (
+            <section>
+              <h2 className="text-xl font-bold tracking-tighter mb-4 inline-block border-b border-black text-red-700">WHAT DIDN'T WORK</h2>
+              <p className="text-lg whitespace-pre-wrap">{experience.whatDidnt}</p>
+            </section>
+          )}
+
 
           {/* QUICK FACTS */}
           <section className="bg-white border-2 border-black p-6 font-mono text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">

@@ -21,7 +21,7 @@ service cloud.firestore {
         && request.resource.data.duration is string
         && request.resource.data.year is string
         && request.resource.data.keys().hasAll(['userId', 'title', 'author', 'category', 'duration', 'year', 'createdAt'])
-        && request.resource.data.keys().hasOnly(['userId', 'title', 'author', 'category', 'goal', 'origin', 'destination', 'duration', 'cost', 'year', 'quote', 'createdAt', 'views']);
+        && request.resource.data.keys().hasOnly(['userId', 'title', 'author', 'category', 'goal', 'origin', 'destination', 'duration', 'cost', 'year', 'quote', 'whatWorked', 'whatDidnt', 'createdAt', 'views']);
       // Only the author can delete
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
       // Author can update everything, anyone can update just the views field

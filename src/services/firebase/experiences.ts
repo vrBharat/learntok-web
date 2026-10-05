@@ -15,6 +15,8 @@ export interface ExperienceData {
   cost?: string;
   year: string;
   quote?: string;
+  whatWorked?: string;
+  whatDidnt?: string;
   createdAt?: any;
   views?: number;
 }
