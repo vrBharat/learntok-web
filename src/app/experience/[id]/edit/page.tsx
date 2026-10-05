@@ -20,6 +20,8 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
     goal: '',
     duration: '',
     cost: '',
+    whatWorked: '',
+    whatDidnt: '',
   });
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
           goal: data.goal || '',
           duration: data.duration || '',
           cost: data.cost || '',
+          whatWorked: data.whatWorked || '',
+          whatDidnt: data.whatDidnt || '',
         });
       } else {
         toast.error("Experience not found.");
@@ -166,6 +170,30 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
                   onChange={e => setFormData({...formData, cost: e.target.value})}
                 />
               </div>
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-6">
+            <h2 className="text-xl font-bold tracking-tighter bg-black text-white px-3 py-1 self-start">4. DEEP DIVE</h2>
+            
+            <div className="flex flex-col gap-2">
+              <label className="font-bold text-sm">What Worked?</label>
+              <textarea 
+                placeholder="Share the strategies, resources, or decisions that actually helped you."
+                className="w-full border-2 border-black bg-white p-3 font-mono text-sm min-h-[120px] outline-none focus:ring-4 focus:ring-blue-500/20"
+                value={formData.whatWorked}
+                onChange={e => setFormData({...formData, whatWorked: e.target.value})}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="font-bold text-sm">What Didn't Work? (Mistakes to avoid)</label>
+              <textarea 
+                placeholder="What failures or roadblocks did you face? What do you wish you knew earlier?"
+                className="w-full border-2 border-black bg-white p-3 font-mono text-sm min-h-[120px] outline-none focus:ring-4 focus:ring-blue-500/20"
+                value={formData.whatDidnt}
+                onChange={e => setFormData({...formData, whatDidnt: e.target.value})}
+              />
             </div>
           </section>
 
