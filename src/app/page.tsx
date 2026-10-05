@@ -74,6 +74,14 @@ import { getExperiences, getCategoryCounts, ExperienceData } from '@/services/fi
         </form>
       </section>
 
+      {/* What is LearnTok Section - SEO Optimized */}
+      <section className="w-full flex flex-col gap-4 p-6 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <h2 className="text-xl font-bold tracking-tighter">What is LearnTok?</h2>
+        <p className="font-mono text-sm text-gray-700 leading-relaxed">
+          <strong>LearnTok</strong> is a platform where you can discover real, authentic experiences from people who have already achieved what you are trying to do. Whether you are looking for career advice, mentorship, tips on moving abroad, or learning new skills, LearnTok connects you with the unvarnished reality of the journey. No gurus, just real people sharing how they did it.
+        </p>
+      </section>
+
       {/* Categories Section */}
       <section className="w-full">
         <h2 className="text-xl font-bold tracking-tighter border-b-2 border-black pb-2 mb-6">

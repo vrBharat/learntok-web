@@ -67,7 +67,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-[#fdfaf6] text-black antialiased min-h-screen flex flex-col`} nonce={nonce}>
+      <body className={`${inter.className} bg-[#fdfaf6] text-black antialiased min-h-screen flex flex-col`}>
         <ReduxProvider>
           <AuthInit>
             <GlobalNavbar />
