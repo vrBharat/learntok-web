@@ -9,6 +9,7 @@ import { getExperienceById, deleteExperience, ExperienceData, incrementViewCount
 import { getQuestionsForExperience, addQuestion, replyToQuestion, QuestionData } from '@/services/firebase/questions';
 import ShareableExperienceCard from '@/components/ShareableExperienceCard';
 import { toast } from 'sonner';
+import { sendQuestionEmail, sendReplyEmail } from '@/services/email';
 
 export default function ExperienceDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -57,9 +58,11 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
     setIsSubmittingQuestion(true);
     try {
       const qId = await addQuestion(resolvedParams.id, user.id, user.username, newQuestionText);
+      sendQuestionEmail(resolvedParams.id, user.username, newQuestionText).catch(logger.error);
       setQuestions([...questions, {
         id: qId,
         experienceId: resolvedParams.id,
+        askerId: user.id,
         askerUsername: user.username,
         text: newQuestionText
       }]);
@@ -99,6 +102,12 @@ export default function ExperienceDetail({ params }: { params: Promise<{ id: str
     if (!replyText.trim()) return;
     try {
       await replyToQuestion(questionId, replyText);
+      
+      const question = questions.find(q => q.id === questionId);
+      if (question && question.askerId && user) {
+        sendReplyEmail(resolvedParams.id, question.askerId, user.username, replyText).catch(logger.error);
+      }
+
       setQuestions(questions.map(q => q.id === questionId ? { ...q, reply: replyText } : q));
       setReplyingToId(null);
       setReplyText('');
