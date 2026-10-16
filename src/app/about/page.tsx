@@ -1,5 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About',
+  description: "LearnTok is the platform to discover real, authentic experiences from people who've already done what you're trying to do. No gurus, just real people.",
+  alternates: {
+    canonical: '/about',
+  },
+};
 
 export default function AboutPage() {
   return (

@@ -13,7 +13,10 @@ import { headers } from 'next/headers';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://learntok.in'),
+  metadataBase: new URL('https://www.learntok.in'),
+  alternates: {
+    canonical: '/',
+  },
   title: {
     default: "LearnTok | Find people who've already done it",
     template: "%s | LearnTok",
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://learntok.in",
+    url: "https://www.learntok.in",
     siteName: "LearnTok",
     title: "LearnTok | Find people who've already done it",
     description: "Discover real experiences from people who've already done what you're trying to do on LearnTok.",
